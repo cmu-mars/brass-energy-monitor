@@ -2,18 +2,18 @@
 
 namespace gazebo
 {
-  class WorldPluginTutorial : public WorldPlugin
+  class EnergyMonitorPlugin : public WorldPlugin
   {
-    public: WorldPluginTutorial() : WorldPlugin()
+    public: EnergyMonitorPlugin() : WorldPlugin()
             {
-              printf("Hello World!\n");
-		gzerr << "HELLO WORLD\n"; 
+				gzdbg << "Constructed energy_monitor." << "\n";
             }
 
     public: void Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
             {
+				gzdbg << "Loaded energy_monitor." << "\n";
             }
   };
-  GZ_REGISTER_WORLD_PLUGIN(WorldPluginTutorial)
+  GZ_REGISTER_WORLD_PLUGIN(EnergyMonitorPlugin)
 }
 
