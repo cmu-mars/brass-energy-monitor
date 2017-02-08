@@ -15,7 +15,7 @@ namespace gazebo
 				gzdbg << "Constructed energy_monitor." << "\n";
             }
 
-    public: void Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
+    public: void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
             {
 				gzdbg << "Loaded energy_monitor." << "\n";
             }
