@@ -44,7 +44,7 @@ namespace gazebo {
 			// Create a named topic, and subscribe to it.
 			ros::SubscribeOptions so =
 			  ros::SubscribeOptions::create<std_msgs::Float32>(
-				  "/" + this->model->GetName() + "/energy_monitor",
+				  "/energy_monitor/energy_level",
 				  1,
 				  boost::bind(&EnergyMonitorPlugin::OnRosMsg, this, _1),
 				  ros::VoidPtr(), &this->rosQueue);
@@ -63,7 +63,7 @@ namespace gazebo {
 			gzdbg << "received message" << _msg->data;
 		}
 
-		// ROS helper function that processes messages
+		/// ROS helper function that processes messages
 		private: void QueueThread()
 		{
 		  static const double timeout = 0.01;
