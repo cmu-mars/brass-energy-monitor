@@ -8,6 +8,7 @@
 #include "ros/callback_queue.h"
 #include "ros/subscribe_options.h"
 #include "std_msgs/Float64.h"
+#include "std_msgs/Bool.h"
 
 namespace gazebo {
   class EnergyMonitorPlugin : public ModelPlugin {
@@ -76,7 +77,7 @@ namespace gazebo {
 
 			// Create a named topic, and subscribe to it.
 			ros::SubscribeOptions so =
-			  ros::SubscribeOptions::create<std_msgs::Int32>(
+			  ros::SubscribeOptions::create<std_msgs::Bool>(
 				  "/energy_monitor/set_charging",
 				  1,
 				  boost::bind(&EnergyMonitorPlugin::OnSetChargingMsg, this, _1),
@@ -112,7 +113,7 @@ namespace gazebo {
 		}
 
 		// Handle an incoming message from ROS
-		public: void OnSetChargingMsg(const std_msgs::Int32ConstPtr &_msg)
+		public: void OnSetChargingMsg(const std_msgs::BoolConstPtr &_msg)
 		{
 			charging = _msg->data;
 			gzdbg << "received message" << charging << "\n";
