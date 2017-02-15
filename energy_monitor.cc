@@ -96,7 +96,7 @@ namespace gazebo {
 			// Publish a topic
 			this->chargeStatePub = this->rosNode->advertise<std_msgs::Float64>(
 					"/energy_monitor/power_state",
-					1)
+					1);
 
 			// Spin up the queue helper thread.
 			this->rosQueueThread =
