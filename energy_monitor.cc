@@ -15,7 +15,7 @@ namespace gazebo {
 				gzdbg << "Constructed energy_monitor." << "\n";
             }
 
-		~EnergyMonitorPlugin {
+		~EnergyMonitorPlugin() {
 			this->rosNode->shutDown();
 		}
 	
