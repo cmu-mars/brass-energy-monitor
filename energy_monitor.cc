@@ -76,7 +76,7 @@ namespace gazebo {
 
 			// Create a named topic, and subscribe to it.
 			ros::SubscribeOptions so =
-			  ros::SubscribeOptions::create<std_msgs::Bool>(
+			  ros::SubscribeOptions::create<std_msgs::Int32>(
 				  "/energy_monitor/set_charging",
 				  1,
 				  boost::bind(&EnergyMonitorPlugin::OnSetChargingMsg, this, _1),
@@ -112,10 +112,10 @@ namespace gazebo {
 		}
 
 		// Handle an incoming message from ROS
-		public: void OnSetChargingMsg(const std_msgs::BoolConstPtr &_msg)
+		public: void OnSetChargingMsg(const std_msgs::Int32ConstPtr &_msg)
 		{
 			charging = _msg->data;
-			gzdbg << "received message" << data << "\n";
+			gzdbg << "received message" << charging << "\n";
 		}
 
 		/// ROS helper function that processes messages
