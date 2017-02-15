@@ -35,11 +35,13 @@ namespace gazebo {
 
 		// Charge level
 		double battery_capacity = 10000.0 /* mwhr */;
+		bool charging;
 		double discharge_rate = -100.0 /* mwhr / sec */;
+		double charge_rate = 50.0 /* mwhr / sec */;
 		double cur_charge /* mwhr */;
 
 		// Time management
-		double last_time;
+		double last_time /* s */;
 
 		// gazebo stuff
 		physics::WorldPtr world;
@@ -53,6 +55,7 @@ namespace gazebo {
 			gzdbg << "Initial time: " << last_time << "\n";
 
 			cur_charge = battery_capacity;
+			charging = false;
 
 			// Register callback for every simulation tick
 			this->updateConnection = event::Events::ConnectWorldUpdateBegin( 
@@ -73,10 +76,10 @@ namespace gazebo {
 
 			// Create a named topic, and subscribe to it.
 			ros::SubscribeOptions so =
-			  ros::SubscribeOptions::create<std_msgs::Float64>(
-				  "/energy_monitor/energy_monitor_cmds",
+			  ros::SubscribeOptions::create<std_msgs::Bool>(
+				  "/energy_monitor/set_charging",
 				  1,
-				  boost::bind(&EnergyMonitorPlugin::OnRosMsg, this, _1),
+				  boost::bind(&EnergyMonitorPlugin::OnSetChargingMsg, this, _1),
 				  ros::VoidPtr(), &this->rosQueue);
 			this->rosSub = this->rosNode->subscribe(so);
 
@@ -89,11 +92,16 @@ namespace gazebo {
 
 		void UpdateChild() {
 			// Update time
-			double curr_time = this->world->GetSimTime().Double(); // measured in seconds I believe
+			double curr_time = this->world->GetSimTime().Double(); // measured in seconds
 			double dt = curr_time - last_time; 
 			last_time = curr_time;
 		    
-			cur_charge = cur_charge + discharge_rate * dt;
+			if (charging) {
+				cur_charge += charge_rate * dt;
+			} else {
+				cur_charge += discharge_rate * dt;
+			}
+
 			if (cur_charge < 0.0) {
 				cur_charge = 0.0;
 			}
@@ -104,9 +112,10 @@ namespace gazebo {
 		}
 
 		// Handle an incoming message from ROS
-		public: void OnRosMsg(const std_msgs::Float64ConstPtr &_msg)
+		public: void OnSetChargingMsg(const std_msgs::BoolConstPtr &_msg)
 		{
-			gzdbg << "received message" << _msg->data << "\n";
+			charging = _msg->data;
+			gzdbg << "received message" << data << "\n";
 		}
 
 		/// ROS helper function that processes messages
