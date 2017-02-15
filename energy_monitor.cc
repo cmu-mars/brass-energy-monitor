@@ -49,7 +49,7 @@ namespace gazebo {
 			this->world = _model->GetWorld();
 
 			last_time = this->world->GetSimTime().Double(); 
-			gzdbg << "Initial time: " << last_time;
+			gzdbg << "Initial time: " << last_time << "\n";
 
 			cur_charge = battery_capacity;
 
@@ -97,13 +97,13 @@ namespace gazebo {
 				cur_charge = 0.0;
 			}
 
-			gzdbg << "current charge: " << cur_charge;
+			gzdbg << "current charge: " << cur_charge << "\n";
 		}
 
 		// Handle an incoming message from ROS
 		public: void OnRosMsg(const std_msgs::Float64ConstPtr &_msg)
 		{
-			gzdbg << "received message" << _msg->data;
+			gzdbg << "received message" << _msg->data << "\n";
 		}
 
 		/// ROS helper function that processes messages
