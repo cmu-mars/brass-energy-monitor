@@ -2,6 +2,7 @@
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
 
+#include <cmath>
 #include <thread>
 #include "ros/ros.h"
 #include "ros/callback_queue.h"
@@ -96,8 +97,10 @@ namespace gazebo {
 			if (cur_charge < 0.0) {
 				cur_charge = 0.0;
 			}
-
-			gzdbg << "current charge: " << cur_charge << "\n";
+			
+			if (fmod(cur_charge, 50.0) < 1.0) { 
+				gzdbg << "current charge: " << cur_charge << "\n";
+			}
 		}
 
 		// Handle an incoming message from ROS
