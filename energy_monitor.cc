@@ -4,7 +4,7 @@
 #include "ros/ros.h"
 #include "ros/callback_queue.h"
 #include "ros/subscribe_options.h"
-#include "std_msgs/Float32.h"
+#include "std_msgs/Float64.h"
 
 namespace gazebo {
   class EnergyMonitorPlugin : public ModelPlugin {
@@ -12,6 +12,10 @@ namespace gazebo {
 		EnergyMonitorPlugin() : ModelPlugin() {
 				gzdbg << "Constructed energy_monitor." << "\n";
             }
+
+		~GazeboRosPowerMonitor {
+			this->rosNode->shutDown();
+		}
 	
 	private:
 		// A node use for ROS transport
@@ -26,8 +30,31 @@ namespace gazebo {
 		// A thread the keeps the running rosQueue
 		std::thread rosQueueThread;
 
+		// Charge level
+		double battery_capacity = 10000.0 /* mwhr */;
+		double discharge_rate = -100.0 /* mwhr / sec */;
+		double cur_charge /* mwhr */;
+
+		// Time management
+		double last_time;
+
+		// gazebo stuff
+		physics::WorldPtr world;
+		event::ConnectionPtr updateConnection;
+
     public: 
 		void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+			this->world = _model->GetWorld();
+
+			last_time = this->world->GetSimTime().Double(); 
+			gzdbg << "Initial time: " << last_time;
+
+			cur_charge = battery_capacity;
+
+			// Register callback for every simulation tick
+			this->updateConnection = event::Events::ConnectWorldUpdateBegin( 
+					boost::bind(&EnergyMonitorPlugin::UpdateChild, this)); 
+
 			// Initialize ros, if it has not already bee initialized.
 			if (!ros::isInitialized())
 			{
@@ -43,8 +70,8 @@ namespace gazebo {
 
 			// Create a named topic, and subscribe to it.
 			ros::SubscribeOptions so =
-			  ros::SubscribeOptions::create<std_msgs::Float32>(
-				  "/energy_monitor/energy_level",
+			  ros::SubscribeOptions::create<std_msgs::Float64>(
+				  "/energy_monitor/energy_monitor_cmds",
 				  1,
 				  boost::bind(&EnergyMonitorPlugin::OnRosMsg, this, _1),
 				  ros::VoidPtr(), &this->rosQueue);
@@ -57,8 +84,22 @@ namespace gazebo {
 			gzdbg << "Loaded energy_monitor." << "\n";
 		}
 
+		void UpdateChild() {
+			// Update time
+			double curr_time = this->world->GetSimTime().Double(); // measured in seconds I believe
+			double dt = curr_time - last_time; 
+			last_time = curr_time;
+		    
+			cur_charge = cur_charge + discharge_rate * dt;
+			if (cur_charge < 0.0) {
+				cur_charge = 0.0;
+			}
+
+			gzdbg << "current charge: " << cur_charge;
+		}
+
 		// Handle an incoming message from ROS
-		public: void OnRosMsg(const std_msgs::Float32ConstPtr &_msg)
+		public: void OnRosMsg(const std_msgs::Float64ConstPtr &_msg)
 		{
 			gzdbg << "received message" << _msg->data;
 		}
