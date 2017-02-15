@@ -1,4 +1,6 @@
 #include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
+#include <gazebo/common/common.hh>
 
 #include <thread>
 #include "ros/ros.h"
