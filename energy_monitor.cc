@@ -125,8 +125,10 @@ namespace gazebo {
 				gzdbg << "current charge: " << cur_charge << "\n";
 			}
 
+			std_msgs::Float64 msg;
+			msg.data = cur_charge;
 			lock.lock();
-			this->chargeStatePub.publish(cur_charge);
+			this->chargeStatePub.publish(msg);
 			lock.unlock();
 		}
 
