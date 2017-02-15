@@ -16,7 +16,7 @@ namespace gazebo {
             }
 
 		~EnergyMonitorPlugin() {
-			this->rosNode->shutDown();
+			this->rosNode->shutdown();
 		}
 	
 	private:
