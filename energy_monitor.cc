@@ -2,8 +2,11 @@
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
 
+#include <boost/thread/mutex.hpp>
+
 #include <cmath>
 #include <thread>
+
 #include "ros/ros.h"
 #include "ros/callback_queue.h"
 #include "ros/subscribe_options.h"
@@ -27,6 +30,12 @@ namespace gazebo {
 
 		// A ROS subscriber
 		ros::Subscriber rosSub;
+
+		// A ROS publisher
+		ros::Publisher chargeStatePub;
+
+		// A lock to prevent ticks from happening at the same time as messages.
+		boost::mutex lock;
 
 		// A ROS callbackqueue that helps process messages
 		ros::CallbackQueue rosQueue;
@@ -84,6 +93,11 @@ namespace gazebo {
 				  ros::VoidPtr(), &this->rosQueue);
 			this->rosSub = this->rosNode->subscribe(so);
 
+			// Publish a topic
+			chargeStatePub = this->advertise<std_msgs::Float64>(
+					"/energy_monitor/power_state",
+					1)
+
 			// Spin up the queue helper thread.
 			this->rosQueueThread =
 			  std::thread(std::bind(&EnergyMonitorPlugin::QueueThread, this));
@@ -110,13 +124,19 @@ namespace gazebo {
 			if (fmod(cur_charge, 50.0) < 1.0) { 
 				gzdbg << "current charge: " << cur_charge << "\n";
 			}
+
+			lock.lock();
+			chargeStatePub.publish(cur_charge);
+			lock.unlock();
 		}
 
 		// Handle an incoming message from ROS
 		public: void OnSetChargingMsg(const std_msgs::BoolConstPtr &_msg)
 		{
+			lock.lock();
 			charging = _msg->data;
 			gzdbg << "received message" << charging << "\n";
+			lock.unlock();
 		}
 
 		/// ROS helper function that processes messages
