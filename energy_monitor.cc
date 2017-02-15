@@ -94,7 +94,7 @@ namespace gazebo {
 			this->rosSub = this->rosNode->subscribe(so);
 
 			// Publish a topic
-			chargeStatePub = this->advertise<std_msgs::Float64>(
+			this->chargeStatePub = this->rosNode->advertise<std_msgs::Float64>(
 					"/energy_monitor/power_state",
 					1)
 
@@ -126,7 +126,7 @@ namespace gazebo {
 			}
 
 			lock.lock();
-			chargeStatePub.publish(cur_charge);
+			this->chargeStatePub.publish(cur_charge);
 			lock.unlock();
 		}
 
