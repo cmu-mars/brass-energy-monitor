@@ -50,7 +50,7 @@ namespace gazebo {
 		const double charge_rate = 500.0 / SEC_PER_HR /* mwh / sec */;
 
 
-		const double battery_capacity /* mwh */ = 10000.0; // TODO get actual number 
+		const double battery_capacity /* mwh */ = 32560.0; // TODO is this the right number?
 		
 		const double delta_base_FULLSPEED /* mwh / sec */ = 14004.0 /* mwh / hr */ / SEC_PER_HR; 
 		const double delta_base_HALFSPEED /* mwh / sec */= 6026.0 / SEC_PER_HR;
@@ -169,7 +169,7 @@ namespace gazebo {
 		}
 
 		// Handle an incoming message from ROS
-		public: void OnSetChargingMsg(const std_msgs::BoolConstPtr &_msg)
+		void OnSetChargingMsg(const std_msgs::BoolConstPtr &_msg)
 		{
 			lock.lock();
 			charging = _msg->data;
