@@ -68,7 +68,7 @@ namespace gazebo {
 		}
 
 		Speed speed_of(double v, double twist_z) {
-			abs_twist_z = abs(twist_z);
+			double abs_twist_z = abs(twist_z);
 			if (v > 0.4 && abs_twist_z < 0.3) {
 				return FULLSPEED;
 			} else if (v > 0.01 && abs_twist_z > 0.01) {
