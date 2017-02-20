@@ -198,10 +198,9 @@ namespace gazebo {
 			lock.unlock();
 		}
 
-		void OnGetModelState(const geometry_msgs::TwistConstPtr &_msg) {
+		void OnGetModelState(const geometry_msgs::TwistConstPtr &twist) {
 			lock.lock();
-			geometry_msgs::Twist twist = _msg->data;
-			gzdbg << "x: " << twist.linear.x << "; y: " << twist.linear.y << "z: " << twist.angular.z << "\n";
+			gzdbg << "x: " << twist->linear.x << "; y: " << twist->linear.y << "z: " << twist->angular.z << "\n";
 			// TODO do something with it
 			lock.unlock();
 		}
