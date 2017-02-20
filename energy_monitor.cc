@@ -30,8 +30,9 @@ namespace gazebo {
 		// A node use for ROS transport
 		std::unique_ptr<ros::NodeHandle> rosNode;
 
-		// A ROS subscriber
-		ros::Subscriber rosSub;
+		// ROS subscribers
+		ros::Subscriber set_charging_sub;
+		ros::Subscriber get_model_state_sub;
 
 		// A ROS publisher
 		ros::Publisher chargeStatePub;
@@ -62,6 +63,17 @@ namespace gazebo {
 				case FULLSPEED: return delta_base_FULLSPEED; break;
 				case HALFSPEED: return delta_base_HALFSPEED; break;
 				case STOPPED:   return delta_base_STOPPED; break;
+			}
+		}
+
+		Speed speed_of(double v, double twist_z) {
+			abs_twist_z = abs(twist_z);
+			if (v > 0.4 && abs_twist_z < 0.3) {
+				return FULLSPEED;
+			} else if (v > 0.01 && abs_twist_z > 0.01) {
+				return HALFSPEED;
+			} else {
+				return STOPPED;
 			}
 		}
 
@@ -122,11 +134,19 @@ namespace gazebo {
 				  1,
 				  boost::bind(&EnergyMonitorPlugin::OnSetChargingMsg, this, _1),
 				  ros::VoidPtr(), &this->rosQueue);
-			this->rosSub = this->rosNode->subscribe(so);
+			this->set_charging_sub = this->rosNode->subscribe(so);
+
+			ros::SubscribeOptions get_model_state_so = 
+				ros::SubscribeOptions::create<geometry_msgs::Twist>(
+						"/gazebo/get_model_state",
+						1,
+						boost::bind(&EnergyMonitorPlugin::OnGetModelState, this, _1),
+						ros::VoidPtr(), &this->rosQueue);
+			this->get_model_state_sub = this->rosNode->subscribe(get_model_state_so);
 
 			// Publish a topic
 			this->chargeStatePub = this->rosNode->advertise<std_msgs::Float64>(
-					"/energy_monitor/power_state",
+					"/energy_monitor/energy_level",
 					1);
 
 			// Spin up the queue helper thread.
@@ -174,6 +194,14 @@ namespace gazebo {
 			lock.lock();
 			charging = _msg->data;
 			gzdbg << "received message" << charging << "\n";
+			lock.unlock();
+		}
+
+		void OnGetModelState(const geometry_msgs::TwistConstPtr &_msg) {
+			lock.lock();
+			Twist twist = _msg->data;
+			gzdbg << "x: " << twist.linear.x << "; y: " << twist.linear.y << "z: " << twist.angular.z << "\n";
+			// TODO do something with it
 			lock.unlock();
 		}
 
