@@ -51,7 +51,6 @@ namespace gazebo {
 		bool charging;
 		const double charge_rate = 500.0 / SEC_PER_HR /* mwh / sec */;
 
-
 		const double battery_capacity /* mwh */ = 32560.0; // TODO is this the right number?
 		
 		const double delta_base_FULLSPEED /* mwh / sec */ = 14004.0 /* mwh / hr */ / SEC_PER_HR; 
@@ -76,6 +75,10 @@ namespace gazebo {
 			} else {
 				return STOPPED;
 			}
+		}
+
+		double v_of(double x, double y) {
+			return sqrt(pow(x, 2) + pow(y, 2));
 		}
 
 		const double delta_kinect_USED /* mwh / sec */ = 5132.0 / SEC_PER_HR;
@@ -200,8 +203,12 @@ namespace gazebo {
 
 		void OnGetModelState(const geometry_msgs::TwistConstPtr &twist) {
 			lock.lock();
-			gzdbg << "x: " << twist->linear.x << "; y: " << twist->linear.y << "z: " << twist->angular.z << "\n";
-			// TODO do something with it
+			double x = twist->linear.x;
+			double y = twist->linear.y;
+			double z = twist->angular.z;
+			double v = v_of(x, y);
+			speed = speed_of(v, z);
+			gzdbg << "x, y, z: " << x << ", " << y << ", " << z << "\n";
 			lock.unlock();
 		}
 
