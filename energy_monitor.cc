@@ -12,6 +12,7 @@
 #include "ros/subscribe_options.h"
 #include "std_msgs/Float64.h"
 #include "std_msgs/Bool.h"
+#include "geometry_msgs/Twist.h"
 
 namespace gazebo {
   class EnergyMonitorPlugin : public ModelPlugin {
