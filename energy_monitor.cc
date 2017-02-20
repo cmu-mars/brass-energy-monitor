@@ -25,6 +25,8 @@ namespace gazebo {
 		}
 	
 	private:
+		const double SEC_PER_HR = 3600.0;
+
 		// A node use for ROS transport
 		std::unique_ptr<ros::NodeHandle> rosNode;
 
@@ -44,14 +46,43 @@ namespace gazebo {
 		std::thread rosQueueThread;
 
 		// Charge level
-		double battery_capacity = 10000.0 /* mwhr */;
 		bool charging;
-		double discharge_rate = -100.0 /* mwhr / sec */;
-		double charge_rate = 50.0 /* mwhr / sec */;
-		double cur_charge /* mwhr */;
+		const double charge_rate = 500.0 / SEC_PER_HR /* mwh / sec */;
+
+
+		const double battery_capacity /* mwh */ = 10000.0; // TODO get actual number 
+		
+		const double delta_base_FULLSPEED /* mwh / sec */ = 14004.0 /* mwh / hr */ / SEC_PER_HR; 
+		const double delta_base_HALFSPEED /* mwh / sec */= 6026.0 / SEC_PER_HR;
+		const double delta_base_STOPPED /* mwh / sec */ = 0.0 / SEC_PER_HR;
+		enum Speed { FULLSPEED, HALFSPEED, STOPPED };
+		Speed speed = FULLSPEED;
+		double delta_base_of(Speed speed) {
+			switch(speed) {
+				case FULLSPEED: return delta_base_FULLSPEED; break;
+				case HALFSPEED: return delta_base_HALFSPEED; break;
+				case STOPPED:   return delta_base_STOPPED; break;
+			}
+		}
+
+		const double delta_kinect_USED /* mwh / sec */ = 5132.0 / SEC_PER_HR;
+		const double delta_kinect_UNUSED /* mwh / sec */ = 250.0 / SEC_PER_HR;
+		enum KinectState { USED, UNUSED };
+		KinectState kinectState = USED;
+		double delta_kinect_of(KinectState kinectState) {
+			switch(kinectState) {
+				case USED: return delta_kinect_USED; break;
+				case UNUSED: return delta_kinect_UNUSED; break;
+			}
+		}
+
+		const double delta_nuc /* mwh / sec */ = 11088.0 / SEC_PER_HR;
+
+		double cur_charge /* mwh */;
 
 		// Time management
 		double last_time /* s */;
+		double last_print_time /* s */ = -1.0;
 
 		// gazebo stuff
 		physics::WorldPtr world;
@@ -114,15 +145,20 @@ namespace gazebo {
 			if (charging) {
 				cur_charge += charge_rate * dt;
 			} else {
-				cur_charge += discharge_rate * dt;
+				double delta_base = delta_base_of(speed);
+				double delta_kinect = delta_kinect_of(kinectState);
+				double delta_discharging_energy = 
+					- (delta_base + delta_kinect + delta_nuc);
+				cur_charge += delta_discharging_energy * dt;
 			}
 
 			if (cur_charge < 0.0) {
 				cur_charge = 0.0;
 			}
 			
-			if (fmod(cur_charge, 50.0) < 1.0) { 
+			if ((curr_time - last_print_time) >= 1.0) {
 				gzdbg << "current charge: " << cur_charge << "\n";
+				last_print_time = curr_time;
 			}
 
 			std_msgs::Float64 msg;
