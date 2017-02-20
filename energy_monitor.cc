@@ -66,11 +66,15 @@ namespace gazebo {
 			}
 		}
 
+		const double v_FULL_thresh = 0.4;
+		const double v_HALF_thresh = 0.01;
+		const double z_FULL_thresh = 0.3;
+		const double z_HALF_thresh = 0.01;
 		Speed speed_of(double v, double twist_z) {
 			double abs_twist_z = abs(twist_z);
-			if (v > 0.4 && abs_twist_z < 0.3) {
+			if (v > v_FULL_thresh && abs_twist_z < z_FULL_thresh) {
 				return FULLSPEED;
-			} else if (v > 0.01 && abs_twist_z > 0.01) {
+			} else if (v > v_HALF_thresh && abs_twist_z > z_HALF_thresh) {
 				return HALFSPEED;
 			} else {
 				return STOPPED;
