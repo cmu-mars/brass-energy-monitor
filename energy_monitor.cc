@@ -36,6 +36,7 @@ namespace gazebo {
 		ros::Subscriber set_charging_sub;
 		ros::Subscriber get_model_state_sub;
 		ros::Subscriber kinect_onoff_sub;
+		ros::Subscriber nuc_utilization_sub;
 
 		// A ROS publisher
 		ros::Publisher chargeStatePub;
@@ -98,6 +99,7 @@ namespace gazebo {
 			}
 		}
 
+		double nuc_utilization = 0.0;
 		const double delta_nuc /* mwh / sec */ = 11088.0 / SEC_PER_HR;
 
 		double cur_charge /* mwh */;
@@ -161,6 +163,14 @@ namespace gazebo {
 						boost::bind(&EnergyMonitorPlugin::OnKinectOnOffMsg, this, _1),
 						ros::VoidPtr(), &this->rosQueue);
 			this->kinect_onoff_sub = this->rosNode->subscribe(kinect_onoff_so);
+
+			ros::SubscribeOptions nuc_utilization_so = 
+				ros::SubscribeOptions::create<std_msgs::Float64>(
+						"/nuc/utilization",
+						1,
+						boost::bind(&EnergyMonitorPlugin::OnNucUtilizationMsg, this, _1),
+						ros::VoidPtr(), &this->rosQueue);
+			this->nuc_utilization_sub = this->rosNode->subscribe(nuc_utilization_so);
 
 			// Publish a topic
 			this->chargeStatePub = this->rosNode->advertise<std_msgs::Float64>(
@@ -228,14 +238,24 @@ namespace gazebo {
 
 		void OnKinectOnOffMsg(const std_msgs::StringConstPtr &msg) {
 			lock.lock();
-			auto s = msg->data;
-			if (s == "on") {
+			auto s = msg->data.c_str();
+			if (strcmp(s, "on") == 0) {
 				gzdbg << "kinect on" << "\n";
 				kinectState = USED;
-			} else {
+			} else if (strcmp(s, "off") == 0) {
 				gzdbg << "kinect off" << "\n";
 				kinectState = UNUSED;
+			} else {
+				gzerr << "invalid kinect on/off string: " << s << "\n"
 			}
+			lock.unlock();
+		}
+
+		void OnNucUtilizationMsg(const std_msgs::Float64ConstPtr &msg) {
+			lock.lock();
+			auto s = msg->data;
+			nuc_utilization = s;
+			gzdbg << "nuc utilization " << s << "\n";
 			lock.unlock();
 		}
 
