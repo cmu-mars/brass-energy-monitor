@@ -246,7 +246,7 @@ namespace gazebo {
 				gzdbg << "kinect off" << "\n";
 				kinectState = UNUSED;
 			} else {
-				gzerr << "invalid kinect on/off string: " << s << "\n"
+				gzerr << "invalid kinect on/off string: " << s << "\n";
 			}
 			lock.unlock();
 		}
