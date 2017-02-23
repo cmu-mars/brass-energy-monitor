@@ -49,9 +49,9 @@ namespace gazebo {
 
 		// Charge level
 		bool charging;
-		const double charge_rate = 500.0 / SEC_PER_HR /* mwh / sec */;
+		const double charge_rate = 30055.0 / SEC_PER_HR /* mwh / sec */;
 
-		const double battery_capacity /* mwh */ = 32560.0; // TODO is this the right number?
+		const double battery_capacity /* mwh */ = 32560.0;
 		
 		const double delta_base_FULLSPEED /* mwh / sec */ = 14004.0 /* mwh / hr */ / SEC_PER_HR; 
 		const double delta_base_HALFSPEED /* mwh / sec */= 6026.0 / SEC_PER_HR;
@@ -72,7 +72,7 @@ namespace gazebo {
 		const double z_HALF_thresh = 0.01;
 		Speed speed_of(double v, double twist_z) {
 			double abs_twist_z = abs(twist_z);
-			if (v > v_FULL_thresh && abs_twist_z < z_FULL_thresh) {
+			if (v > v_FULL_thresh && abs_twist_z > z_FULL_thresh) {
 				return FULLSPEED;
 			} else if (v > v_HALF_thresh && abs_twist_z > z_HALF_thresh) {
 				return HALFSPEED;
