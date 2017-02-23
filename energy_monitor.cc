@@ -12,6 +12,7 @@
 #include "ros/subscribe_options.h"
 #include "std_msgs/Float64.h"
 #include "std_msgs/Bool.h"
+#include "std_msgs/String.h"
 #include "geometry_msgs/Twist.h"
 
 namespace gazebo {
@@ -34,6 +35,7 @@ namespace gazebo {
 		// ROS subscribers
 		ros::Subscriber set_charging_sub;
 		ros::Subscriber get_model_state_sub;
+		ros::Subscriber kinect_onoff_sub;
 
 		// A ROS publisher
 		ros::Publisher chargeStatePub;
@@ -152,6 +154,14 @@ namespace gazebo {
 						ros::VoidPtr(), &this->rosQueue);
 			this->get_model_state_sub = this->rosNode->subscribe(get_model_state_so);
 
+			ros::SubscribeOptions kinect_onoff_so = 
+				ros::SubscribeOptions::create<std_msgs::String>(
+						"/sensor/kinect/onoff",
+						1,
+						boost::bind(&EnergyMonitorPlugin::OnKinectOnOffMsg, this, _1),
+						ros::VoidPtr(), &this->rosQueue);
+			this->kinect_onoff_sub = this->rosNode->subscribe(kinect_onoff_so);
+
 			// Publish a topic
 			this->chargeStatePub = this->rosNode->advertise<std_msgs::Float64>(
 					"/energy_monitor/energy_level",
@@ -213,6 +223,13 @@ namespace gazebo {
 			double v = v_of(x, y);
 			speed = speed_of(v, z);
 			gzdbg << "x, y, z: " << x << ", " << y << ", " << z << "\n";
+			lock.unlock();
+		}
+
+		void OnKinectOnOffMsg(const std_msgs::StringConstPtr &msg) {
+			lock.lock();
+			auto s = msg->data;
+			gzdbg << "received " << s << "\n";
 			lock.unlock();
 		}
 
