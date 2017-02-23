@@ -229,7 +229,13 @@ namespace gazebo {
 		void OnKinectOnOffMsg(const std_msgs::StringConstPtr &msg) {
 			lock.lock();
 			auto s = msg->data;
-			gzdbg << "received " << s << "\n";
+			if (s == "on") {
+				gzdbg << "kinect on" << "\n";
+				kinectState = USED;
+			} else {
+				gzdbg << "kinect off" << "\n";
+				kinectState = UNUSED;
+			}
 			lock.unlock();
 		}
 
