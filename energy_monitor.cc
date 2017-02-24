@@ -247,7 +247,7 @@ namespace gazebo {
 				cur_charge += delta_discharging_energy * dt;
 			}
 
-			if (cur_charge < 0.0) {
+			if (cur_charge <= 0.0) {
 				cur_charge = 0.0;
 #ifdef ENERGY_MONITOR_DEBUG
 				gzdbg << "out of power\n";
