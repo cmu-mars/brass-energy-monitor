@@ -251,10 +251,10 @@ namespace gazebo {
 			lock.unlock();
 
 			// publish voltage
-			std_msgs::Int32 msg;
+			std_msgs::Int32 v_msg;
 			msg.data = voltage_of_charge(cur_charge);
 			lock.lock();
-			this->charge_v_pub.publish(msg);
+			this->charge_v_pub.publish(v_msg);
 			lock.unlock();
 		}
 
