@@ -15,6 +15,7 @@
 #include "std_msgs/Bool.h"
 #include "std_msgs/String.h"
 #include "geometry_msgs/Twist.h"
+#include <kobuki_msgs/MotorPower.h>
 
 #include "v_data.cc"
 
@@ -49,6 +50,7 @@ namespace gazebo {
 		// A ROS publisher
 		ros::Publisher charge_state_pub;
 		ros::Publisher charge_v_pub;
+		ros::Publisher motor_power_pub;
 
 		// A lock to prevent ticks from happening at the same time as messages.
 		boost::mutex lock;
@@ -216,6 +218,10 @@ namespace gazebo {
 					"/energy_monitor/voltage",
 					1);
 
+			this->motor_power_pub = this->rosNode->advertise<kobuki_msgs::MotorPower>(
+					"/mobile_base/commands/motor_power",
+					1);
+
 			// Spin up the queue helper thread.
 			this->rosQueueThread =
 			  std::thread(std::bind(&EnergyMonitorPlugin::QueueThread, this));
@@ -243,6 +249,15 @@ namespace gazebo {
 
 			if (cur_charge < 0.0) {
 				cur_charge = 0.0;
+#ifdef ENERGY_MONITOR_DEBUG
+				gzdbg << "out of power\n";
+#endif
+				// turn off motor
+				kobuki_msgs::MotorPower power_msg;
+				power_msg.state = 0;
+				lock.lock();
+				this->motor_power_pub.publish(power_msg);
+				lock.unlock();
 			}
 			
 			if ((curr_time - last_print_time) >= 1.0) {
