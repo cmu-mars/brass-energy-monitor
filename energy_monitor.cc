@@ -180,9 +180,9 @@ namespace gazebo {
 					1);
 
 
-			this->charge_v_pub = this->rosNode->advertise<std_msgs::Int32>(
-					"/energy_monitor/energy_level",
-					1);
+			/* this->charge_v_pub = this->rosNode->advertise<std_msgs::Int32>( */
+			/* 		"/energy_monitor/energy_level", */
+			/* 		1); */
 
 			// Spin up the queue helper thread.
 			this->rosQueueThread =
