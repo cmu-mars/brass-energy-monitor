@@ -99,8 +99,10 @@ namespace gazebo {
 			}
 		}
 
-		double nuc_utilization = 0.0;
-		const double delta_nuc /* mwh / sec */ = 11088.0 / SEC_PER_HR;
+		double nuc_utilization = 0.0; /* ranges from 0.0 to 100.0 */
+		double delta_nuc_of(double nuc_utilization) {
+			return (115.28*nuc_utilization + 6894.0) / SEC_PER_HR;
+		}
 
 		double cur_charge /* mwh */;
 
@@ -177,6 +179,11 @@ namespace gazebo {
 					"/energy_monitor/energy_level",
 					1);
 
+
+			this->charge_v_pub = this->rosNode->advertise<std_msgs::Int32>(
+					"/energy_monitor/energy_level",
+					1);
+
 			// Spin up the queue helper thread.
 			this->rosQueueThread =
 			  std::thread(std::bind(&EnergyMonitorPlugin::QueueThread, this));
@@ -195,6 +202,7 @@ namespace gazebo {
 			} else {
 				double delta_base = delta_base_of(speed);
 				double delta_kinect = delta_kinect_of(kinectState);
+				double delta_nuc = delta_nuc_of(nuc_utilization);
 				double delta_discharging_energy = 
 					- (delta_base + delta_kinect + delta_nuc);
 				cur_charge += delta_discharging_energy * dt;
