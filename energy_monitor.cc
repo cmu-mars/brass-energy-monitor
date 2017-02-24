@@ -21,9 +21,9 @@ namespace gazebo {
   class EnergyMonitorPlugin : public ModelPlugin {
     public: 
 		EnergyMonitorPlugin() : ModelPlugin() {
-				#ifdef ENERGY_MONITOR_DEBUG
+#ifdef ENERGY_MONITOR_DEBUG
 					gzdbg << "Constructed energy_monitor." << "\n";
-				#endif
+#endif
             }
 
 		~EnergyMonitorPlugin() {
@@ -123,7 +123,10 @@ namespace gazebo {
 			this->world = _model->GetWorld();
 
 			last_time = this->world->GetSimTime().Double(); 
+
+#ifdef ENERGY_MONITOR_DEBUG
 			gzdbg << "Initial time: " << last_time << "\n";
+#endif
 
 			cur_charge = battery_capacity;
 			charging = false;
@@ -191,8 +194,9 @@ namespace gazebo {
 			// Spin up the queue helper thread.
 			this->rosQueueThread =
 			  std::thread(std::bind(&EnergyMonitorPlugin::QueueThread, this));
-
+#ifdef ENERGY_MONITOR_DEBUG
 			gzdbg << "Loaded energy_monitor." << "\n";
+#endif
 		}
 
 		void UpdateChild() {
@@ -217,7 +221,9 @@ namespace gazebo {
 			}
 			
 			if ((curr_time - last_print_time) >= 1.0) {
+#ifdef ENERGY_MONITOR_DEBUG
 				gzdbg << "current charge: " << cur_charge << "\n";
+#endif
 				last_print_time = curr_time;
 			}
 
@@ -233,7 +239,9 @@ namespace gazebo {
 		{
 			lock.lock();
 			charging = _msg->data;
+#ifdef ENERGY_MONITOR_DEBUG
 			gzdbg << "received message" << charging << "\n";
+#endif
 			lock.unlock();
 		}
 
@@ -244,7 +252,9 @@ namespace gazebo {
 			double z = twist->angular.z;
 			double v = v_of(x, y);
 			speed = speed_of(v, z);
+#ifdef ENERGY_MONITOR_DEBUG
 			gzdbg << "x, y, z: " << x << ", " << y << ", " << z << "\n";
+#endif
 			lock.unlock();
 		}
 
@@ -252,10 +262,14 @@ namespace gazebo {
 			lock.lock();
 			auto s = msg->data.c_str();
 			if (strcmp(s, "on") == 0) {
+#ifdef ENERGY_MONITOR_DEBUG
 				gzdbg << "kinect on" << "\n";
+#endif
 				kinectState = USED;
 			} else if (strcmp(s, "off") == 0) {
+#ifdef ENERGY_MONITOR_DEBUG
 				gzdbg << "kinect off" << "\n";
+#endif
 				kinectState = UNUSED;
 			} else {
 				gzerr << "invalid kinect on/off string: " << s << "\n";
@@ -267,7 +281,9 @@ namespace gazebo {
 			lock.lock();
 			auto s = msg->data;
 			nuc_utilization = s;
+#ifdef ENERGY_MONITOR_DEBUG
 			gzdbg << "nuc utilization " << s << "\n";
+#endif
 			lock.unlock();
 		}
 
