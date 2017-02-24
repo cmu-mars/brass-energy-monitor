@@ -15,11 +15,15 @@
 #include "std_msgs/String.h"
 #include "geometry_msgs/Twist.h"
 
+#define ENERGY_MONITOR_DEBUG
+
 namespace gazebo {
   class EnergyMonitorPlugin : public ModelPlugin {
     public: 
 		EnergyMonitorPlugin() : ModelPlugin() {
-				gzdbg << "Constructed energy_monitor." << "\n";
+				#ifdef ENERGY_MONITOR_DEBUG
+					gzdbg << "Constructed energy_monitor." << "\n";
+				#endif
             }
 
 		~EnergyMonitorPlugin() {
