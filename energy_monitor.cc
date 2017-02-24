@@ -200,7 +200,7 @@ namespace gazebo {
 
 			ros::SubscribeOptions nuc_utilization_so = 
 				ros::SubscribeOptions::create<std_msgs::Float64>(
-						"/nuc/utilization",
+						"/energy_monitor/set_nuc_utilization",
 						1,
 						boost::bind(&EnergyMonitorPlugin::OnNucUtilizationMsg, this, _1),
 						ros::VoidPtr(), &this->rosQueue);
