@@ -10,10 +10,13 @@
 #include "ros/ros.h"
 #include "ros/callback_queue.h"
 #include "ros/subscribe_options.h"
+#include "std_msgs/Int32.h"
 #include "std_msgs/Float64.h"
 #include "std_msgs/Bool.h"
 #include "std_msgs/String.h"
 #include "geometry_msgs/Twist.h"
+
+#include "v_data.cc"
 
 #define ENERGY_MONITOR_DEBUG
 
@@ -43,7 +46,8 @@ namespace gazebo {
 		ros::Subscriber nuc_utilization_sub;
 
 		// A ROS publisher
-		ros::Publisher chargeStatePub;
+		ros::Publisher charge_state_pub;
+		ros::Publisher charge_v_pub;
 
 		// A lock to prevent ticks from happening at the same time as messages.
 		boost::mutex lock;
@@ -109,6 +113,18 @@ namespace gazebo {
 		}
 
 		double cur_charge /* mwh */;
+
+		int voltage_of_charge(double charge) {
+			double pct = charge / battery_capacity;
+			double idx_dbl = pct * NUM_V_DATA;
+			int idx_int = round(idx_dbl);
+			return v_data[idx_int];
+		}
+
+		double charge_of_voltage(int voltage) {
+			double pct = percent_of_v[voltage - MIN_VOLTAGE];
+			return pct * battery_capacity;
+		}
 
 		// Time management
 		double last_time /* s */;
@@ -182,14 +198,14 @@ namespace gazebo {
 			this->nuc_utilization_sub = this->rosNode->subscribe(nuc_utilization_so);
 
 			// Publish a topic
-			this->chargeStatePub = this->rosNode->advertise<std_msgs::Float64>(
+			this->charge_state_pub = this->rosNode->advertise<std_msgs::Float64>(
 					"/energy_monitor/energy_level",
 					1);
 
 
-			/* this->charge_v_pub = this->rosNode->advertise<std_msgs::Int32>( */
-			/* 		"/energy_monitor/energy_level", */
-			/* 		1); */
+			this->charge_v_pub = this->rosNode->advertise<std_msgs::Int32>(
+					"/energy_monitor/voltage",
+					1);
 
 			// Spin up the queue helper thread.
 			this->rosQueueThread =
@@ -227,10 +243,18 @@ namespace gazebo {
 				last_print_time = curr_time;
 			}
 
+			// publish charge state
 			std_msgs::Float64 msg;
 			msg.data = cur_charge;
 			lock.lock();
-			this->chargeStatePub.publish(msg);
+			this->charge_state_pub.publish(msg);
+			lock.unlock();
+
+			// publish voltage
+			std_msgs::Int32 msg;
+			msg.data = voltage_of_charge(cur_charge);
+			lock.lock();
+			this->charge_v_pub.publish(msg);
 			lock.unlock();
 		}
 
