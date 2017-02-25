@@ -28,6 +28,7 @@ namespace gazebo {
 #ifdef ENERGY_MONITOR_DEBUG
 					gzdbg << "Constructed energy_monitor." << "\n";
 #endif
+		ROS_INFO_STREAM("BRASS Energy Monitor loaded");
             }
 
 		~EnergyMonitorPlugin() {
@@ -86,9 +87,9 @@ namespace gazebo {
 		const double z_HALF_thresh = 0.01;
 		Speed speed_of(double v, double twist_z) {
 			double abs_twist_z = abs(twist_z);
-			if (v > v_FULL_thresh && abs_twist_z > z_FULL_thresh) {
+			if (v > v_FULL_thresh || abs_twist_z > z_FULL_thresh) {
 				return FULLSPEED;
-			} else if (v > v_HALF_thresh && abs_twist_z > z_HALF_thresh) {
+			} else if (v > v_HALF_thresh || abs_twist_z > z_HALF_thresh) {
 				return HALFSPEED;
 			} else {
 				return STOPPED;
@@ -121,7 +122,9 @@ namespace gazebo {
 			double pct = charge / battery_capacity;
 			double idx_dbl = pct * NUM_V_DATA;
 			int idx_int = round(idx_dbl);
-			return v_data[idx_int];
+			// The highest voltage is idx 0 in v_data, so need 
+			// reverse this when calculating
+			return v_data[NUM_V_DATA - idx_int];
 		}
 
 		double charge_of_voltage(int voltage) {
@@ -276,7 +279,7 @@ namespace gazebo {
 
 			// publish voltage
 			std_msgs::Int32 v_msg;
-			msg.data = voltage_of_charge(cur_charge);
+			v_msg.data = voltage_of_charge(cur_charge);
 			lock.lock();
 			this->charge_v_pub.publish(v_msg);
 			lock.unlock();
