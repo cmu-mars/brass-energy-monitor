@@ -23,7 +23,7 @@ Gazebo energy monitor plugin for BRASS project
 ```
 /energy_monitor/set_charging : Bool
 
-  True if the robot is in charging mode, False otherwise (default: False)
+  True if the robot is in charging mode, False otherwise (initially: True)
 
 /energy_monitor/set_voltage : Int32
 
