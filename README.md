@@ -8,7 +8,7 @@ Gazebo energy monitor plugin for BRASS project
 
   The current energy level, in mwh.
 
-/energy_monitor/voltage : Float64
+/energy_monitor/voltage : Int32
 
   The current simulated voltage, determined from the energy level according to
   the empirical data Ivan gathered. The relevant data is in v_data.cc.
