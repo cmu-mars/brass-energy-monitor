@@ -148,7 +148,7 @@ namespace gazebo {
 #endif
 
 			cur_charge = battery_capacity;
-			charging = false;
+			charging = true;
 
 			// Register callback for every simulation tick
 			this->updateConnection = event::Events::ConnectWorldUpdateBegin( 
@@ -258,6 +258,8 @@ namespace gazebo {
 				lock.lock();
 				this->motor_power_pub.publish(power_msg);
 				lock.unlock();
+			} else if (cur_charge >= battery_capacity) {
+				cur_charge = battery_capacity;
 			}
 			
 			if ((curr_time - last_print_time) >= 1.0) {
