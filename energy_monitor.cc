@@ -19,7 +19,7 @@
 
 #include "v_data.cc"
 
-#undefine ENERGY_MONITOR_DEBUG
+#undef ENERGY_MONITOR_DEBUG
 
 namespace gazebo {
   class EnergyMonitorPlugin : public ModelPlugin {
