@@ -20,6 +20,7 @@
 #include "v_data.cc"
 
 #undef ENERGY_MONITOR_DEBUG
+#define ENERGY_LEVEL_DBG_INTERVAL 5.0
 
 namespace gazebo {
   class EnergyMonitorPlugin : public ModelPlugin {
@@ -65,6 +66,7 @@ namespace gazebo {
 		// Charge level
 		bool charging;
 		const double charge_rate = 30055.0 / SEC_PER_HR /* mwh / sec */;
+		const double multiplier = 10.0; // make things go faster
 
 		const double battery_capacity /* mwh */ = 32560.0;
 		
@@ -247,7 +249,7 @@ namespace gazebo {
 				double delta_nuc = delta_nuc_of(nuc_utilization);
 				double delta_discharging_energy = 
 					- (delta_base + delta_kinect + delta_nuc);
-				cur_charge += delta_discharging_energy * dt;
+				cur_charge += multiplier * delta_discharging_energy * dt;
 			}
 
 			if (cur_charge <= 0.0) {
@@ -265,7 +267,7 @@ namespace gazebo {
 				cur_charge = battery_capacity;
 			}
 			
-			if ((curr_time - last_print_time) >= 1.0) {
+			if ((curr_time - last_print_time) >= ENERGY_LEVEL_DBG_INTERVAL) {
 #ifdef ENERGY_MONITOR_DEBUG
 				gzdbg << "current charge: " << cur_charge << "\n";
 #endif
