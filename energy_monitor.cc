@@ -242,7 +242,7 @@ namespace gazebo {
 			last_time = curr_time;
 		    
 			if (charging) {
-				cur_charge += charge_rate * dt;
+				cur_charge += charge_rate * multiplier * dt;
 			} else {
 				double delta_base = delta_base_of(speed);
 				double delta_kinect = delta_kinect_of(kinectState);
