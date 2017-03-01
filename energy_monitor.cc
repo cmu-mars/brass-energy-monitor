@@ -72,13 +72,17 @@ namespace gazebo {
 		
 		const double delta_base_FULLSPEED /* mwh / sec */ = 14004.0 /* mwh / hr */ / SEC_PER_HR; 
 		const double delta_base_HALFSPEED /* mwh / sec */= 6026.0 / SEC_PER_HR;
+		const double delta_base_FULLSPEEDR /* mwh / sec */= 17640 / SEC_PER_HR;
+		const double delta_base_HALFSPEEDR /* mwh / sec */=(delta_base_FULLSPEEDR * delta_base_HALFSPEED/delta_base_FULLSPEED) / SEC_PER_HR;
 		const double delta_base_STOPPED /* mwh / sec */ = 0.0 / SEC_PER_HR;
-		enum Speed { FULLSPEED, HALFSPEED, STOPPED };
+		enum Speed { FULLSPEED, FULLSPEEDR, HALFSPEED, HALFSPEEDR, STOPPED };
 		Speed speed = FULLSPEED;
 		double delta_base_of(Speed speed) {
 			switch(speed) {
 				case FULLSPEED: return delta_base_FULLSPEED; break;
 				case HALFSPEED: return delta_base_HALFSPEED; break;
+				case FULLSPEEDR: return delta_base_FULLSPEEDR; break;
+				case HALFSPEEDR: return delta_base_HALFSPEEDR; break;
 				case STOPPED:   return delta_base_STOPPED; break;
 			}
 		}
@@ -89,6 +93,19 @@ namespace gazebo {
 		const double z_HALF_thresh = 0.01;
 		Speed speed_of(double v, double twist_z) {
 			double abs_twist_z = abs(twist_z);
+			if (abs_twist_z > z_FULL_thresh) {
+				return FULLSPEEDR;
+			} else if (v > v_FULL_thresh) {
+				return FULLSPEED;
+			} else if (abs_twist_z > z_HALF_thresh) {
+				return HALFSPEEDR;
+			} else if (v > v_HALF_thresh) {
+				return HALFSPEED;
+			}
+			else {
+				return STOPPED;
+			}
+/*
 			if (v > v_FULL_thresh || abs_twist_z > z_FULL_thresh) {
 				return FULLSPEED;
 			} else if (v > v_HALF_thresh || abs_twist_z > z_HALF_thresh) {
@@ -96,6 +113,7 @@ namespace gazebo {
 			} else {
 				return STOPPED;
 			}
+*/
 		}
 
 		double v_of(double x, double y) {
