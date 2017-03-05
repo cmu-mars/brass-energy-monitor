@@ -66,7 +66,7 @@ namespace gazebo {
 		// Charge level
 		bool charging;
 		const double charge_rate = 30055.0 / SEC_PER_HR /* mwh / sec */;
-		const double multiplier = 10.0; // make things go faster
+		const double multiplier = 5.0; // make things go faster
 
 		const double battery_capacity /* mwh */ = 32560.0;
 		
