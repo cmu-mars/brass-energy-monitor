@@ -138,6 +138,7 @@ namespace gazebo {
 
 		double cur_charge /* mwh */;
 
+		// used to send voltage sensor values to the robot (a main use case)
 		int voltage_of_charge(double charge) {
 			double pct = charge / battery_capacity;
 			double idx_dbl = pct * NUM_V_DATA;
@@ -147,6 +148,9 @@ namespace gazebo {
 			return v_data[NUM_V_DATA - idx_int];
 		}
 
+		// used to interpret the messed-up MIT-LL input (a crutch)
+		// from voltage (what it shouldn't be)
+		// to charge (what it should be)
 		double charge_of_voltage(int voltage) {
 			double pct = percent_of_v[voltage - MIN_VOLTAGE];
 			return pct * battery_capacity;
