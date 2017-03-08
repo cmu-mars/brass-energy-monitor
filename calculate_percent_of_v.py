@@ -18,8 +18,8 @@ for v in range(start_v, end_v + 1):
 for v in range(start_v, end_v + 1):
     try: idx = voltages_r.index(float(v))
     except ValueError: idx = len_voltages # fill in voltages that are missing according to their position in the voltage interval (may happen in a sharp drop or incomplete files)
-    pct = 1.0 - (float(idx) / float(len_voltages))
-    percent_of_v_pess.append(pct)
+    pct = (float(idx) / float(len_voltages))
+    percent_of_v_pess.insert(0, pct)
 
 percent_of_v_pess = list(reversed(percent_of_v_pess)) # need to reverse it another time for the original order
 
