@@ -19,7 +19,7 @@
 
 #include "v_data.cc"
 
-#undef ENERGY_MONITOR_DEBUG
+#define ENERGY_MONITOR_DEBUG
 #define ENERGY_LEVEL_DBG_INTERVAL 5.0
 
 namespace gazebo {
@@ -295,7 +295,7 @@ namespace gazebo {
 			
 			if ((curr_time - last_print_time) >= ENERGY_LEVEL_DBG_INTERVAL) {
 #ifdef ENERGY_MONITOR_DEBUG
-				gzdbg << "current charge: " << cur_charge << "\n";
+				gzdbg << "current charge (" << (charging?"c":"d") << "): " << cur_charge << "\n";
 #endif
 				last_print_time = curr_time;
 			}
@@ -320,9 +320,9 @@ namespace gazebo {
 		{
 			lock.lock();
 			charging = _msg->data;
-#ifdef ENERGY_MONITOR_DEBUG
+/*#ifdef ENERGY_MONITOR_DEBUG
 			gzdbg << "received message" << charging << "\n";
-#endif
+#endif*/
 			lock.unlock();
 		}
 
@@ -372,9 +372,9 @@ namespace gazebo {
 			lock.lock();
 			auto s = msg->data;
 			nuc_utilization = s;
-#ifdef ENERGY_MONITOR_DEBUG
+/*#ifdef ENERGY_MONITOR_DEBUG
 			gzdbg << "nuc utilization " << s << "\n";
-#endif
+#endif*/
 			lock.unlock();
 		}
 
