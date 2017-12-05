@@ -1,3 +1,9 @@
+
+
+# This repository is obsolete
+
+Look in https://github.com/cmu-mars/brass_gazebo_plugins for the current version.
+
 # brass-energy-monitor
 Gazebo energy monitor plugin for BRASS project
 
